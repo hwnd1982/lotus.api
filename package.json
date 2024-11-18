@@ -1,16 +1,16 @@
 {
-  "type": "module",
   "scripts": {
-    "start": "tsc --noemit && node --import=./src/dev/register.js src/index.ts",
-    "dev": "nodemon --watch src --ext ts --exec \"tsc --noemit && node --import=./src/dev/register.js src/index.ts\""
+    "start": "ts-node ./src/index.ts",
+    "dev": "nodemon --watch src --ext ts --exec \"ts-node ./src/index.ts\""
   },
   "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.9.0",
     "nodemon": "^3.1.7",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.3"
   },
   "dependencies": {
-    "@types/express": "^5.0.0",
     "express": "^4.21.1"
   }
 }

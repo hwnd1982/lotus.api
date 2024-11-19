@@ -1,5 +1,5 @@
 import express from "express";
-import { createServer } from "node:https";
+import { createServer } from "node:http";
 import { join } from "node:path";
 import { Server } from "socket.io";
 
@@ -9,11 +9,7 @@ const server = createServer(app);
 const io = new Server(server);
 
 app.get("/", (req, res) => {
-  res.sendFile(join(__dirname, "index.html"));
-});
-
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
+  res.sendFile(join(__dirname, "/dist/index.html"));
 });
 
 io.on("connection", socket => {
@@ -22,4 +18,8 @@ io.on("connection", socket => {
   socket.on("disconnect", () => {
     console.log("user disconnected");
   });
+});
+
+server.listen(port, () => {
+  console.log(`Server running at http://localhost:${port}`);
 });

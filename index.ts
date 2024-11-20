@@ -28,7 +28,8 @@ app.get("/*", (req, res) => {
       });
 
       socket.on("disconnect", () => {
-        console.log("user disconnected");
+        console.log("user disconnected", socket.id);
+        socket.emit("disconnect", socket.id);
       });
 
       socket.on("inc", count => {

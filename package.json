@@ -1,7 +1,14 @@
 {
+  "name": "lotus.app",
+  "version": "0.0.1",
+  "author": {
+    "name": "Kirill Lavrov",
+    "email": "hwnd1982@gmail.com"
+  },
+  "license": "ISC",
   "scripts": {
-    "start": "ts-node ./src/index.ts",
-    "dev": "nodemon --watch src --ext ts --exec \"ts-node ./src/index.ts\""
+    "start": "ts-node ./index.ts",
+    "dev": "nodemon --watch src --ext ts --exec \"ts-node ./index.ts\""
   },
   "devDependencies": {
     "@types/express": "^5.0.0",

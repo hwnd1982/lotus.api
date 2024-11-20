@@ -1,5 +1,5 @@
 import express from "express";
-import { createServer } from "node:https";
+import { createServer } from "node:http";
 import { join } from "node:path";
 import { Server } from "socket.io";
 
@@ -38,5 +38,5 @@ app.get("/*", (req, res) => {
 });
 
 server.listen(port, () => {
-  console.log(`Server running at https://localhost:${port}`);
+  console.log(`Server running at http://localhost:${port}`);
 });

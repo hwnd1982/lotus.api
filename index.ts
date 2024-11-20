@@ -18,9 +18,11 @@ app.get("/*", (req, res) => {
   }
 
   if (/\/test/.test(req.url)) {
-    io.on("connection", socket => {
-      console.log("a user connected");
-      socket.emit("connection", state.count);
+    io.once("connection", socket => {
+      socket.on("connection", () => {
+        socket.emit("connection", state.count);
+        console.log("a user connected");
+      });
 
       socket.on("disconnect", () => {
         console.log("user disconnected");

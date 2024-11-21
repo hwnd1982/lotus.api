@@ -10,7 +10,7 @@ const APP_URL = "app/";
 const app = express();
 const port = process.env.PORT || 4001;
 const server = createServer(app);
-const io = new Server(server);
+const io = new Server(server, { connectionStateRecovery: {} });
 
 app.get("/*", (req, res) => {
   if (/.js|.css|.svg$/.test(req.url)) {

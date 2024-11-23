@@ -1,20 +1,51 @@
+import { readFileSync } from "node:fs";
+import * as env from "./env";
 import express from "express";
 import { createServer } from "node:http";
-import { join } from "node:path";
+import { join, parse } from "node:path";
 import { Server } from "socket.io";
+import { title } from "node:process";
 
-const state = {
+const state: {
+  count: number;
+  users: string[];
+} = {
   count: 0,
+  users: [],
 };
-const APP_URL = "app/";
+
 const app = express();
 const port = process.env.PORT || 4001;
 const server = createServer(app);
-const io = new Server(server, { connectionStateRecovery: {} });
+const io = new Server(server);
 
 app.get("/*", (req, res) => {
   if (/.js|.css|.svg$/.test(req.url)) {
-    return res.sendFile(join(__dirname, APP_URL, req.url));
+    return res.sendFile(join(__dirname, env.APP_URL, req.url));
+  }
+
+  if (/\/registration/.test(req.url)) {
+    const db = JSON.parse(readFileSync(join(__dirname, env.DB_URL, "db.json"), "utf8"));
+    const url = parse(req.url);
+
+    if (db?.auctions[url.name]) {
+      console.log("test", db.auctions[url.name]);
+    }
+
+    io.once("connection", socket => {
+      const { title, requirements } = db;
+
+      socket.emit(
+        "registration",
+        JSON.stringify({
+          id: socket.id,
+          settings: {
+            title,
+            requirements,
+          },
+        })
+      );
+    });
   }
 
   if (/\/test/.test(req.url)) {
@@ -23,13 +54,21 @@ app.get("/*", (req, res) => {
       console.log("a user connected");
 
       socket.on("connection", () => {
-        socket.emit("connection", state.count);
-        console.log("a user connected");
+        socket.emit("connection", { count: state.count, id: socket.id });
+        state.users.push(socket.id);
+        console.log(`a user: ${socket.id} connected`);
+      });
+
+      socket.on("disconnecting", reason => {
+        for (const room of socket.rooms) {
+          if (room !== socket.id) {
+            socket.to(room).emit("left", socket.id);
+          }
+        }
       });
 
       socket.on("disconnect", () => {
-        console.log("user disconnected", socket.id);
-        socket.emit("disconnected", socket.id);
+        console.log(`user ${socket.id} disconnected`);
       });
 
       socket.on("inc", count => {
@@ -40,7 +79,7 @@ app.get("/*", (req, res) => {
     });
   }
 
-  res.sendFile(join(__dirname, APP_URL, "index.html"));
+  res.sendFile(join(__dirname, env.APP_URL, "index.html"));
 });
 
 server.listen(port, () => {

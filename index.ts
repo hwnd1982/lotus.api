@@ -60,9 +60,9 @@ app.get("/*", (req, res) => {
 
   io.once("connection", socket => {
     socket.emit("connection", socket.id);
-    socket.on("connection", () => {
-      console.log(url.name, socket.id, socket.rooms);
-    });
+    // socket.on("connection", () => {
+    //   console.log(url.name, socket.id, socket.rooms);
+    // });
 
     socket.on("registration", () => {
       console.log(url.name);

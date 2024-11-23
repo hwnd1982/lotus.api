@@ -29,7 +29,7 @@ app.get("/*", (req, res) => {
 
   io.once("connection", socket => {
     if (db?.auctions[url.name]) {
-      const { title, requirements } = db;
+      const { title, requirements } = db?.auctions[url.name];
 
       console.log(title, req.url);
 

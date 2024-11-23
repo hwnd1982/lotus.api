@@ -27,13 +27,48 @@ app.get("/*", (req, res) => {
   const db = JSON.parse(readFileSync(join(__dirname, env.DB_URL, "db.json"), "utf8"));
   const url = parse(req.url);
 
+  // if (/\/test/.test(req.url)) {
+  //   io.once("connection", socket => {
+  //     socket.emit("connection", state.count);
+  //     console.log("a user connected");
+
+  //     socket.on("connection", () => {
+  //       socket.emit("connection", { count: state.count, id: socket.id });
+  //       state.users.push(socket.id);
+  //       console.log(`a user: ${socket.id} connected`);
+  //     });
+
+  //     socket.on("disconnecting", reason => {
+  //       for (const room of socket.rooms) {
+  //         if (room !== socket.id) {
+  //           socket.to(room).emit("left", socket.id);
+  //         }
+  //       }
+  //     });
+
+  //     socket.on("disconnect", () => {
+  //       console.log(`user ${socket.id} disconnected`);
+  //     });
+
+  //     socket.on("inc", count => {
+  //       state.count = count + 1;
+  //       io.emit("inc", count + 1);
+  //       console.log("inc", count);
+  //     });
+  //   });
+  // }
+
   io.once("connection", socket => {
-    if (db?.auctions[url.name]) {
-      const { title, requirements } = db?.auctions[url.name];
+    socket.emit("connection", socket.id);
+    socket.on("connection", () => {
+      console.log(url.name, socket.id, socket.rooms);
+    });
 
-      socket.emit("connection", socket.id);
+    socket.on("registration", () => {
+      console.log(url.name);
 
-      socket.on("connection", () => {
+      if (db?.auctions[url.name]) {
+        const { title, requirements } = db?.auctions[url.name];
         console.log(title, req.url);
 
         socket.emit(
@@ -46,8 +81,8 @@ app.get("/*", (req, res) => {
             },
           })
         );
-      });
-    }
+      }
+    });
   });
 
   res.sendFile(join(__dirname, env.APP_URL, "index.html"));

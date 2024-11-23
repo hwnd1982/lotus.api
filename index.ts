@@ -31,9 +31,9 @@ app.get("/*", (req, res) => {
     if (db?.auctions[url.name]) {
       const { title, requirements } = db?.auctions[url.name];
 
-      console.log(title, req.url);
-
       socket.on("registration", () => {
+        console.log(title, req.url);
+
         socket.emit(
           "registration",
           JSON.stringify({

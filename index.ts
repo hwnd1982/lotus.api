@@ -28,23 +28,21 @@ app.get("/*", (req, res) => {
     const db = JSON.parse(readFileSync(join(__dirname, env.DB_URL, "db.json"), "utf8"));
     const url = parse(req.url);
 
-    if (db?.auctions[url.name]) {
-      console.log("test", db.auctions[url.name]);
-    }
-
     io.once("connection", socket => {
-      const { title, requirements } = db;
+      if (db?.auctions[url.name]) {
+        const { title, requirements } = db;
 
-      socket.emit(
-        "registration",
-        JSON.stringify({
-          id: socket.id,
-          settings: {
-            title,
-            requirements,
-          },
-        })
-      );
+        socket.emit(
+          "registration",
+          JSON.stringify({
+            id: socket.id,
+            settings: {
+              title,
+              requirements,
+            },
+          })
+        );
+      }
     });
   }
 

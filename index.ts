@@ -4,7 +4,6 @@ import express from "express";
 import { createServer } from "node:http";
 import { join, parse } from "node:path";
 import { Server } from "socket.io";
-import { emit, title } from "node:process";
 
 const state: {
   count: number;
@@ -24,31 +23,40 @@ app.get("/*", (req, res) => {
     return res.sendFile(join(__dirname, env.APP_URL, req.url));
   }
 
-  if (/\/registration/.test(req.url)) {
+  if (/\/action\/registration/.test(req.url)) {
     const db = JSON.parse(readFileSync(join(__dirname, env.DB_URL, "db.json"), "utf8"));
     const url = parse(req.url);
 
-    io.once("connection", socket => {
-      socket.emit("connection", socket.id);
-      console.log("connection registration", req.url);
+    if (db?.auctions[url.name]) {
+      const { title, requirements } = db?.auctions[url.name];
 
-      if (db?.auctions[url.name]) {
-        const { title, requirements } = db?.auctions[url.name];
+      console.log(title, req.url);
 
-        console.log(title, req.url);
+      res.json({ title, requirements });
 
-        socket.emit(
-          "registration",
-          JSON.stringify({
-            id: socket.id,
-            settings: {
-              title,
-              requirements,
-            },
-          })
-        );
-      }
-    });
+      return;
+    }
+  }
+
+  if (/\/registration/.test(req.url)) {
+    // io.once("connection", socket => {
+    //   socket.emit("connection", socket.id);
+    //   console.log("connection registration", req.url);
+    //   if (db?.auctions[url.name]) {
+    //     const { title, requirements } = db?.auctions[url.name];
+    //     console.log(title, req.url);
+    //     socket.emit(
+    //       "registration",
+    //       JSON.stringify({
+    //         id: socket.id,
+    //         settings: {
+    //           title,
+    //           requirements,
+    //         },
+    //       })
+    //     );
+    //   }
+    // });
   }
 
   // if (/\/test/.test(req.url)) {

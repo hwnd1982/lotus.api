@@ -4,13 +4,15 @@ import express from "express";
 import { createServer } from "node:http";
 import { join, parse } from "node:path";
 import { Server } from "socket.io";
+import bodyParser from "body-parser";
 
 const app = express();
 const port = process.env.PORT || 4001;
 const server = createServer(app);
+var jsonParser = bodyParser.json();
 const io = new Server(server);
 
-app.post("/action/*", (req, res) => {
+app.post("/action/*", jsonParser, (req, res) => {
   if (/\/action\/registration/.test(req.url)) {
     console.log(req.body);
     res.json("123");

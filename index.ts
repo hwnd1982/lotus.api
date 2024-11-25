@@ -10,7 +10,7 @@ const port = process.env.PORT || 4001;
 const server = createServer(app);
 const io = new Server(server);
 
-app.post("/action", (req, res) => {
+app.post("/action/*", (req, res) => {
   if (/\/action\/registration/.test(req.url)) {
     console.log(req.body);
     res.json("123");

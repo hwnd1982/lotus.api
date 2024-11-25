@@ -5,18 +5,17 @@ import { createServer } from "node:http";
 import { join, parse } from "node:path";
 import { Server } from "socket.io";
 
-const state: {
-  count: number;
-  users: string[];
-} = {
-  count: 0,
-  users: [],
-};
-
 const app = express();
 const port = process.env.PORT || 4001;
 const server = createServer(app);
 const io = new Server(server);
+
+app.post("/action", (req, res) => {
+  if (/\/action\/registration/.test(req.url)) {
+    console.log(req.body);
+    res.json("123");
+  }
+});
 
 app.get("/*", (req, res) => {
   if (/.js|.css|.svg$/.test(req.url)) {
@@ -29,8 +28,6 @@ app.get("/*", (req, res) => {
 
     if (db?.auctions[url.name]) {
       const { title, requirements } = db?.auctions[url.name];
-
-      console.log(title, req.url);
 
       res.json({ title, requirements });
 

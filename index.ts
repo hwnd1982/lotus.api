@@ -18,6 +18,8 @@ app.post("/action/*", jsonParser, (req, res) => {
   if (/\/action\/registration/.test(req.url)) {
     const db = JSON.parse(readFileSync(join(__dirname, env.DB_URL, "db.json"), "utf8"));
 
+    console.log(req.body, typeof req.body);
+
     if (db?.auctions[req.body.id]) {
       const { participants }: { participants: (RegistrationValues & { id: string })[] } = db.auctions[req.body.id];
       const newParticipant = { ...req.body, id: randomBytes(8).toString("hex") };

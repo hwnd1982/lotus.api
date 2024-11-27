@@ -5,3 +5,5 @@ export type RegistrationValues = {
   warranty: number | string;
   production_cost: number | string;
 };
+
+export type Participant = RegistrationValues & { id: string; status: "accepted" | "approved" | "rejected" };

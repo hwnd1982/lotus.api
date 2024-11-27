@@ -5,7 +5,7 @@ import { createServer } from "node:http";
 import { join, parse } from "node:path";
 import { Server } from "socket.io";
 import bodyParser from "body-parser";
-import { RegistrationValues } from "./types";
+import { Participant } from "./types";
 import { randomBytes } from "node:crypto";
 
 const app = express();
@@ -19,9 +19,9 @@ app.post("/action/*", jsonParser, (req, res) => {
     const db = JSON.parse(readFileSync(join(__dirname, env.DB_URL, "db.json"), "utf8"));
 
     if (db?.auctions[req.body.id]) {
-      const { participants }: { participants: (RegistrationValues & { id: string })[] } = db.auctions[req.body.id];
-      const newParticipant = { ...req.body, id: randomBytes(8).toString("hex") };
-      const registeredParticipant = participants.find(item => item.name === req.body.name);
+      const { participants }: { participants: Participant[] } = db.auctions[req.body.id];
+      const newParticipant: Participant = { ...req.body, id: randomBytes(8).toString("hex"), status: "accepted" };
+      const registeredParticipant: Participant | undefined = participants.find(item => item.name === req.body.name);
 
       if (!registeredParticipant) {
         db.auctions[req.body.id] = {
@@ -59,25 +59,16 @@ app.get("/*", (req, res) => {
     }
   }
 
-  if (/\/registration/.test(req.url)) {
-    // io.once("connection", socket => {
-    //   socket.emit("connection", socket.id);
-    //   console.log("connection registration", req.url);
-    //   if (db?.auctions[url.name]) {
-    //     const { title, requirements } = db?.auctions[url.name];
-    //     console.log(title, req.url);
-    //     socket.emit(
-    //       "registration",
-    //       JSON.stringify({
-    //         id: socket.id,
-    //         settings: {
-    //           title,
-    //           requirements,
-    //         },
-    //       })
-    //     );
-    //   }
-    // });
+  if (/\/auction/.test(req.url)) {
+    io.once("connection", socket => {
+      const state = {};
+      const url = parse(req.url);
+
+      console.log(url);
+
+      socket.emit("connection", socket.id);
+      socket.on("connection", () => {});
+    });
   }
 
   // if (/\/test/.test(req.url)) {

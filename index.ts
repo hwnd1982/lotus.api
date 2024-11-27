@@ -1,10 +1,12 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import * as env from "./env";
 import express from "express";
 import { createServer } from "node:http";
 import { join, parse } from "node:path";
 import { Server } from "socket.io";
 import bodyParser from "body-parser";
+import { RegistrationValues } from "./types";
+import { randomBytes } from "node:crypto";
 
 const app = express();
 const port = process.env.PORT || 4001;
@@ -14,8 +16,28 @@ const io = new Server(server);
 
 app.post("/action/*", jsonParser, (req, res) => {
   if (/\/action\/registration/.test(req.url)) {
-    console.log(req.body);
-    res.json("123");
+    const db = JSON.parse(readFileSync(join(__dirname, env.DB_URL, "db.json"), "utf8"));
+    const url = parse(req.url);
+
+    if (db?.auctions[url.name]) {
+      const { participants }: { participants: (RegistrationValues & { id: string })[] } = db.auctions[url.name];
+      const newParticipant = { id: randomBytes(8).toString("hex"), ...req.body };
+      const registeredParticipant = participants.find(item => item.name === req.body.name);
+
+      if (!registeredParticipant) {
+        db.auctions[url.name] = {
+          ...db.auctions[url.name],
+          participants: [...participants, newParticipant],
+        };
+        writeFileSync(join(__dirname, env.DB_URL, "db.json"), db);
+        res.status(201);
+        res.json({ id: newParticipant.id });
+        return;
+      }
+
+      res.status(200);
+      res.json({ id: registeredParticipant.id });
+    }
   }
 });
 

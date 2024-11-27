@@ -67,7 +67,9 @@ app.get("/*", (req, res) => {
       console.log(url);
 
       socket.emit("connection", socket.id);
-      socket.on("connection", () => {});
+      socket.on("connection", ({ auctionId, userId }) => {
+        console.log(auctionId, userId);
+      });
     });
   }
 

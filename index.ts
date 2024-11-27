@@ -17,18 +17,18 @@ const io = new Server(server);
 app.post("/action/*", jsonParser, (req, res) => {
   if (/\/action\/registration/.test(req.url)) {
     const db = JSON.parse(readFileSync(join(__dirname, env.DB_URL, "db.json"), "utf8"));
-    const url = parse(req.url);
 
-    if (db?.auctions[url.name]) {
+    if (db?.auctions[req.body.id]) {
       const { participants }: { participants: (RegistrationValues & { id: string })[] } = db.auctions[url.name];
-      const newParticipant = { id: randomBytes(8).toString("hex"), ...req.body };
+      const newParticipant = { ...req.body, id: randomBytes(8).toString("hex") };
       const registeredParticipant = participants.find(item => item.name === req.body.name);
 
       if (!registeredParticipant) {
-        db.auctions[url.name] = {
-          ...db.auctions[url.name],
+        db.auctions[req.body.id] = {
+          ...db.auctions[req.body.id],
           participants: [...participants, newParticipant],
         };
+
         writeFileSync(join(__dirname, env.DB_URL, "db.json"), db);
         res.status(201);
         res.json({ id: newParticipant.id });

@@ -51,8 +51,9 @@ app.get("/*", (req, res) => {
     return res.sendFile(join(__dirname, env.APP_URL, req.url));
   }
 
+  const db = JSON.parse(readFileSync(join(__dirname, env.DB_URL, "db.json"), "utf8"));
+
   if (/\/action\/state/.test(req.url)) {
-    const db = JSON.parse(readFileSync(join(__dirname, env.DB_URL, "db.json"), "utf8"));
     const [auctionId] = Object.keys(db.auctions);
     const { title, status, supervisor, participants, requirements }: Auction = db.auctions[auctionId];
 
@@ -82,12 +83,29 @@ app.get("/*", (req, res) => {
 
   if (/\/auction/.test(req.url)) {
     io.once("connection", socket => {
-      const state: AuctionState = {};
-      const url = parse(req.url);
+      const state: AuctionState = {
+        userId: "",
+        auctionId: "",
+        title: "",
+        status: "idle",
+        supervisor: "",
+        participants: [],
+        requirements: [],
+      };
+      // const url = parse(req.url);
 
       socket.on("connection", ({ auctionId, userId }) => {
+        const { title, status, supervisor, participants, requirements }: Auction = db.auctions[auctionId];
+
         state.userId = userId;
         state.auctionId = auctionId;
+        state.title = title;
+        state.status = status;
+        state.supervisor = supervisor;
+        state.participants = participants;
+        state.requirements = requirements.map(requirement => [requirement.name, requirement.title]);
+
+        socket.emit("connection", state);
       });
 
       socket.on("online", (pass: string) => {
@@ -97,37 +115,6 @@ app.get("/*", (req, res) => {
       });
     });
   }
-
-  // if (/\/test/.test(req.url)) {
-  //   io.once("connection", socket => {
-  //     socket.emit("connection", state.count);
-  //     console.log(`a user ${socket.id} connected`);
-
-  //     socket.on("connection", () => {
-  //       socket.emit("connection", { count: state.count, id: socket.id });
-  //       state.users.push(socket.id);
-  //       console.log(`a user: ${socket.id} connected`);
-  //     });
-
-  //     socket.on("disconnecting", reason => {
-  //       for (const room of socket.rooms) {
-  //         if (room !== socket.id) {
-  //           socket.to(room).emit("left", socket.id);
-  //         }
-  //       }
-  //     });
-
-  //     socket.on("disconnect", () => {
-  //       console.log(`user ${socket.id} disconnected`);
-  //     });
-
-  //     socket.on("inc", count => {
-  //       state.count = count + 1;
-  //       io.emit("inc", count + 1);
-  //       console.log("inc", count);
-  //     });
-  //   });
-  // }
 
   res.sendFile(join(__dirname, env.APP_URL, "index.html"));
 });

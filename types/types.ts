@@ -30,6 +30,11 @@ export type Auction = {
 };
 
 export type AuctionState = {
-  userId?: string;
-  auctionId?: string;
+  userId: string;
+  auctionId: string;
+  title: string;
+  status: "idle" | "registration_participants" | "waiting_start" | "auction_underway" | "auction_over";
+  supervisor: string;
+  participants: Participant[];
+  requirements: [string, string][];
 };

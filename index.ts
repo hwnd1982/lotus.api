@@ -82,7 +82,7 @@ app.get("/*", (req, res) => {
   }
 
   if (/\/auction/.test(req.url)) {
-    io.once("connection", socket => {
+    io.on("connection", socket => {
       const state: Auction<[string, string]> = {
         id: "",
         title: "",
@@ -109,7 +109,7 @@ app.get("/*", (req, res) => {
         state.participants = participants;
         state.requirements = requirements.map(requirement => [requirement.name, requirement.title]);
 
-        console.log("connected");
+        console.log("connected", auctionId, userId);
         socket.emit("connected", state);
       });
 

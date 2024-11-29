@@ -5,7 +5,7 @@ import { createServer } from "node:http";
 import { join, parse } from "node:path";
 import { Server } from "socket.io";
 import bodyParser from "body-parser";
-import { Auction, AuctionState, Participant } from "./types";
+import { Auction, Participant } from "./types";
 import { randomBytes } from "node:crypto";
 
 const app = express();
@@ -63,7 +63,7 @@ app.get("/*", (req, res) => {
       status,
       supervisor,
       participants,
-      requirements: requirements.map(requirement => requirement.title),
+      requirements: requirements.map(requirement => [requirement.name, requirement.title]),
     });
 
     return;
@@ -83,22 +83,26 @@ app.get("/*", (req, res) => {
 
   if (/\/auction/.test(req.url)) {
     io.once("connection", socket => {
-      const state: AuctionState = {
-        userId: "",
-        auctionId: "",
+      const state: Auction<[string, string]> = {
+        id: "",
         title: "",
         status: "idle",
         supervisor: "",
         participants: [],
         requirements: [],
+        production_cost: "",
+        online: [],
       };
       // const url = parse(req.url);
 
       socket.on("connection", ({ auctionId, userId }) => {
         const { title, status, supervisor, participants, requirements }: Auction = db.auctions[auctionId];
 
-        state.userId = userId;
-        state.auctionId = auctionId;
+        if (!state.online.includes(userId)) {
+          state.online.push(userId);
+        }
+
+        state.id = auctionId;
         state.title = title;
         state.status = status;
         state.supervisor = supervisor;
@@ -108,10 +112,9 @@ app.get("/*", (req, res) => {
         socket.emit("connection", state);
       });
 
-      socket.on("online", (pass: string) => {
-        if (pass === state.userId) {
-          socket.emit("online");
-        }
+      socket.on("upgrades", () => {
+        socket.emit("connection", state);
+        console.log("upgrades");
       });
     });
   }

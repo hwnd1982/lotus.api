@@ -20,21 +20,13 @@ export type RequirementsItem = {
   required: boolean;
 };
 
-export type Auction = {
-  title: string;
-  status: "registration_participants" | "waiting_start" | "auction_underway" | "auction_over";
-  supervisor: string;
-  production_cost: number;
-  requirements: RequirementsItem[];
-  participants: Participant[];
-};
-
-export type AuctionState = {
-  userId: string;
-  auctionId: string;
+export type Auction<R = RequirementsItem> = {
+  id: string;
   title: string;
   status: "idle" | "registration_participants" | "waiting_start" | "auction_underway" | "auction_over";
   supervisor: string;
+  production_cost: number | string;
+  requirements: R[];
   participants: Participant[];
-  requirements: [string, string][];
+  online: string[];
 };

@@ -5,7 +5,7 @@ import { createServer } from "node:http";
 import { join, parse } from "node:path";
 import { Server } from "socket.io";
 import bodyParser from "body-parser";
-import { Participant } from "./types";
+import { Auction, AuctionState, Participant } from "./types";
 import { randomBytes } from "node:crypto";
 
 const app = express();
@@ -20,7 +20,12 @@ app.post("/action/*", jsonParser, (req, res) => {
 
     if (db?.auctions[req.body.id]) {
       const { participants }: { participants: Participant[] } = db.auctions[req.body.id];
-      const newParticipant: Participant = { ...req.body, id: randomBytes(8).toString("hex"), status: "accepted" };
+      const newParticipant: Participant = {
+        ...req.body,
+        id: randomBytes(8).toString("hex"),
+        status: "accepted",
+        role: "participant",
+      };
       const registeredParticipant: Participant | undefined = participants.find(item => item.name === req.body.name);
 
       if (!registeredParticipant) {
@@ -46,6 +51,23 @@ app.get("/*", (req, res) => {
     return res.sendFile(join(__dirname, env.APP_URL, req.url));
   }
 
+  if (/\/action\/state/.test(req.url)) {
+    const db = JSON.parse(readFileSync(join(__dirname, env.DB_URL, "db.json"), "utf8"));
+    const [auctionId] = Object.keys(db.auctions);
+    const { title, status, supervisor, participants, requirements }: Auction = db.auctions[auctionId];
+
+    res.json({
+      id: auctionId,
+      title,
+      status,
+      supervisor,
+      participants,
+      requirements: requirements.map(requirement => requirement.title),
+    });
+
+    return;
+  }
+
   if (/\/action\/registration/.test(req.url)) {
     const db = JSON.parse(readFileSync(join(__dirname, env.DB_URL, "db.json"), "utf8"));
     const url = parse(req.url);
@@ -54,21 +76,24 @@ app.get("/*", (req, res) => {
       const { title, requirements } = db?.auctions[url.name];
 
       res.json({ title, requirements });
-
       return;
     }
   }
 
   if (/\/auction/.test(req.url)) {
     io.once("connection", socket => {
-      const state = {};
+      const state: AuctionState = {};
       const url = parse(req.url);
 
-      console.log(url);
-
-      socket.emit("connection", socket.id);
       socket.on("connection", ({ auctionId, userId }) => {
-        console.log(auctionId, userId);
+        state.userId = userId;
+        state.auctionId = auctionId;
+      });
+
+      socket.on("online", (pass: string) => {
+        if (pass === state.userId) {
+          socket.emit("online");
+        }
       });
     });
   }

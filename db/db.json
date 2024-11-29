@@ -3,6 +3,8 @@
     "2033564": {
       "title": "Тестовые торги на аппарат",
       "status": "registration_participants",
+      "supervisor": "fa7983f568fb1149",
+      "production_cost": "3500000",
       "requirements": [
         {
           "title": "Наличие комплекса мероприятий, повышающих стандарты качества изготовления",
@@ -14,7 +16,7 @@
         },
         {
           "title": "Сроки изготовления лота",
-          "unit": "дней",
+          "unit": "дн",
           "note": "",
           "name": "production_time",
           "type": "number",

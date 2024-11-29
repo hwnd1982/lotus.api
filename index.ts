@@ -95,7 +95,7 @@ app.get("/*", (req, res) => {
       };
       // const url = parse(req.url);
 
-      socket.on("connected", ({ auctionId, userId }) => {
+      socket.on("connection", ({ auctionId, userId }) => {
         const { title, status, supervisor, participants, requirements }: Auction = db.auctions[auctionId];
 
         if (!state.online.includes(userId)) {
@@ -109,8 +109,8 @@ app.get("/*", (req, res) => {
         state.participants = participants;
         state.requirements = requirements.map(requirement => [requirement.name, requirement.title]);
 
-        console.log("connected", auctionId, userId);
-        socket.emit("connected", state);
+        console.log("connection", auctionId, userId);
+        socket.emit("connection", state);
       });
 
       socket.on("upgrades", () => {

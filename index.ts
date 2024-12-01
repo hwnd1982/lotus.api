@@ -128,6 +128,7 @@ app.get("/*", (req, res) => {
 
       socket.on("left", id => {
         state.online = state.online.filter(item => item !== id);
+        console.log("left", id);
         socket.broadcast.emit("left", state);
       });
     });

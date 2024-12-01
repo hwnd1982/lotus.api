@@ -67,6 +67,9 @@ app.get("/*", (req, res) => {
   }
 
   const db = JSON.parse(readFileSync(join(__dirname, env.DB_URL, "db.json"), "utf8"));
+  const url = parse(req.url);
+  const { base: userId } = url;
+  const { base: auctionId } = parse(url.dir);
 
   if (/\/action\/state/.test(req.url)) {
     const [auctionId] = Object.keys(db.auctions);
@@ -80,6 +83,11 @@ app.get("/*", (req, res) => {
       state.supervisor = supervisor;
       state.participants = participants;
       state.requirements = requirements.map(requirement => [requirement.name, requirement.title]);
+    }
+
+    if (userId && !state.online.includes(userId)) {
+      console.log(userId);
+      state.online = [...state.online, userId];
     }
 
     res.json(state);
@@ -99,10 +107,6 @@ app.get("/*", (req, res) => {
   }
 
   if (/\/auction/.test(req.url)) {
-    const url = parse(req.url);
-    const { base: userId } = url;
-    const { base: auctionId } = parse(url.dir);
-
     io.once("connection", socket => {
       if (state.status === "idle") {
         const { title, status, supervisor, participants, requirements }: Auction = db.auctions[auctionId];
@@ -115,13 +119,11 @@ app.get("/*", (req, res) => {
         state.requirements = requirements.map(requirement => [requirement.name, requirement.title]);
       }
 
-      console.log(userId);
       if (userId && !state.online.includes(userId)) {
+        console.log(userId);
         state.online = [...state.online, userId];
       }
 
-      socket.emit("connect", state);
-      socket.emit("connection", state);
       socket.broadcast.emit("connection", state);
 
       socket.on("left", id => {

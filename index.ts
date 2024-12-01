@@ -99,11 +99,15 @@ app.get("/*", (req, res) => {
   }
 
   if (/\/auction/.test(req.url)) {
-    io.once("connection", socket => {
-      const url = parse(req.url);
-      const { base: userId } = url;
-      const { base: auctionId } = parse(url.dir);
+    const url = parse(req.url);
+    const { base: userId } = url;
+    const { base: auctionId } = parse(url.dir);
 
+    if (!state.online.includes(userId)) {
+      state.online = [...state.online, userId];
+    }
+
+    io.once("connection", socket => {
       if (state.status === "idle") {
         const { title, status, supervisor, participants, requirements, online }: Auction = db.auctions[auctionId];
 
@@ -116,21 +120,12 @@ app.get("/*", (req, res) => {
         state.online = online;
       }
 
-      if (!state.online.includes(userId)) {
-        state.online = [...state.online, userId];
-      }
-
       socket.broadcast.emit("connection", state);
-
-      socket.on("upgrades", () => {
-        socket.emit("connection", state);
-        console.log("upgrades");
-      });
 
       socket.on("left", id => {
         state.online = state.online.filter(item => item !== id);
-        console.log("left", id);
         socket.broadcast.emit("left", state);
+        console.log("left", id);
       });
     });
   }

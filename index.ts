@@ -14,6 +14,17 @@ const server = createServer(app);
 var jsonParser = bodyParser.json();
 const io = new Server(server);
 
+const state: Auction<[string, string]> = {
+  id: "",
+  title: "",
+  status: "idle",
+  supervisor: "",
+  participants: [],
+  requirements: [],
+  production_cost: "",
+  online: [],
+};
+
 app.post("/action/*", jsonParser, (req, res) => {
   if (/\/action\/registration/.test(req.url)) {
     const db = JSON.parse(readFileSync(join(__dirname, env.DB_URL, "db.json"), "utf8"));
@@ -52,16 +63,6 @@ app.get("/*", (req, res) => {
   }
 
   const db = JSON.parse(readFileSync(join(__dirname, env.DB_URL, "db.json"), "utf8"));
-  const state: Auction<[string, string]> = {
-    id: "",
-    title: "",
-    status: "idle",
-    supervisor: "",
-    participants: [],
-    requirements: [],
-    production_cost: "",
-    online: [],
-  };
 
   if (/\/action\/state/.test(req.url)) {
     const [auctionId] = Object.keys(db.auctions);

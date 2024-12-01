@@ -55,7 +55,7 @@ app.get("/*", (req, res) => {
 
   if (/\/action\/state/.test(req.url)) {
     const [auctionId] = Object.keys(db.auctions);
-    const { title, status, supervisor, participants, requirements }: Auction = db.auctions[auctionId];
+    const { title, status, supervisor, participants, requirements, online }: Auction = db.auctions[auctionId];
 
     res.json({
       id: auctionId,
@@ -64,6 +64,7 @@ app.get("/*", (req, res) => {
       supervisor,
       participants,
       requirements: requirements.map(requirement => [requirement.name, requirement.title]),
+      online,
     });
 
     return;

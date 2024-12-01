@@ -85,7 +85,7 @@ app.get("/*", (req, res) => {
       state.requirements = requirements.map(requirement => [requirement.name, requirement.title]);
     }
 
-    if (userId && !state.online.includes(userId)) {
+    if (auctionId && !state.online.includes(userId)) {
       console.log(userId);
       state.online = [...state.online, userId];
     }

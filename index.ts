@@ -95,8 +95,9 @@ app.get("/*", (req, res) => {
   if (/\/auction/.test(req.url)) {
     io.once("connection", socket => {
       const url = parse(req.url);
+      const auctionId = parse(url.dir);
 
-      console.log(url);
+      console.log(auctionId, url.base);
       // socket.broadcast.emit("connection", url.base);
 
       socket.on("connection", ({ auctionId, userId }) => {

@@ -52,6 +52,16 @@ app.get("/*", (req, res) => {
   }
 
   const db = JSON.parse(readFileSync(join(__dirname, env.DB_URL, "db.json"), "utf8"));
+  const state: Auction<[string, string]> = {
+    id: "",
+    title: "",
+    status: "idle",
+    supervisor: "",
+    participants: [],
+    requirements: [],
+    production_cost: "",
+    online: [],
+  };
 
   if (/\/action\/state/.test(req.url)) {
     const [auctionId] = Object.keys(db.auctions);
@@ -84,18 +94,7 @@ app.get("/*", (req, res) => {
 
   if (/\/auction/.test(req.url)) {
     io.once("connection", socket => {
-      const state: Auction<[string, string]> = {
-        id: "",
-        title: "",
-        status: "idle",
-        supervisor: "",
-        participants: [],
-        requirements: [],
-        production_cost: "",
-        online: [],
-      };
       // const url = parse(req.url);
-
       socket.on("connection", ({ auctionId, userId }) => {
         const { title, status, supervisor, participants, requirements }: Auction = db.auctions[auctionId];
 

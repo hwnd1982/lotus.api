@@ -83,7 +83,7 @@ app.get("/*", (req, res) => {
   }
 
   if (/\/auction/.test(req.url)) {
-    io.on("connection", socket => {
+    io.once("connection", socket => {
       const state: Auction<[string, string]> = {
         id: "",
         title: "",
@@ -111,7 +111,7 @@ app.get("/*", (req, res) => {
         state.requirements = requirements.map(requirement => [requirement.name, requirement.title]);
 
         console.log("connection", auctionId, userId);
-        socket.emit("connection", state);
+        socket.broadcast.emit("connection", state);
       });
 
       socket.on("upgrades", () => {

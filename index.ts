@@ -125,6 +125,11 @@ app.get("/*", (req, res) => {
         socket.emit("connection", state);
         console.log("upgrades");
       });
+
+      socket.on("left", id => {
+        state.online = state.online.filter(item => item !== id);
+        socket.broadcast.emit("left", state);
+      });
     });
   }
 

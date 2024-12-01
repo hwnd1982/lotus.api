@@ -95,27 +95,21 @@ app.get("/*", (req, res) => {
   if (/\/auction/.test(req.url)) {
     io.once("connection", socket => {
       const url = parse(req.url);
-      const auctionId = parse(url.dir);
+      const { base: userId } = url;
+      const { base: auctionId } = parse(url.dir);
+      const { title, status, supervisor, participants, requirements }: Auction = db.auctions[auctionId];
 
-      console.log(auctionId, url.base);
-      // socket.broadcast.emit("connection", url.base);
+      state.id = auctionId;
+      state.title = title;
+      state.status = status;
+      state.supervisor = supervisor;
+      state.participants = participants;
+      state.requirements = requirements.map(requirement => [requirement.name, requirement.title]);
+      if (!state.online.includes(userId)) {
+        state.online = [...state.online, userId];
+      }
 
-      socket.on("connection", ({ auctionId, userId }) => {
-        const { title, status, supervisor, participants, requirements }: Auction = db.auctions[auctionId];
-
-        state.id = auctionId;
-        state.title = title;
-        state.status = status;
-        state.supervisor = supervisor;
-        state.participants = participants;
-        state.requirements = requirements.map(requirement => [requirement.name, requirement.title]);
-        if (!state.online.includes(userId)) {
-          state.online = [...state.online, userId];
-        }
-
-        console.log("connection", auctionId, userId);
-        socket.broadcast.emit("connection", state);
-      });
+      socket.broadcast.emit("connection", state);
 
       socket.on("upgrades", () => {
         socket.emit("connection", state);

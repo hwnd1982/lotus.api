@@ -94,13 +94,11 @@ app.get("/*", (req, res) => {
 
   if (/\/auction/.test(req.url)) {
     io.once("connection", socket => {
-      // const url = parse(req.url);
+      const url = parse(req.url);
+
+      socket.broadcast.emit("connection", url.base);
       socket.on("connection", ({ auctionId, userId }) => {
         const { title, status, supervisor, participants, requirements }: Auction = db.auctions[auctionId];
-
-        if (!state.online.includes(userId)) {
-          state.online.push(userId);
-        }
 
         state.id = auctionId;
         state.title = title;
@@ -108,6 +106,9 @@ app.get("/*", (req, res) => {
         state.supervisor = supervisor;
         state.participants = participants;
         state.requirements = requirements.map(requirement => [requirement.name, requirement.title]);
+        if (!state.online.includes(userId)) {
+          state.online = [...state.online, userId];
+        }
 
         console.log("connection", auctionId, userId);
         socket.broadcast.emit("connection", state);

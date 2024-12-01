@@ -72,12 +72,10 @@ app.get("/*", (req, res) => {
   const { base: auctionId } = parse(url.dir);
 
   if (/\/action\/state/.test(req.url)) {
-    const [id] = Object.keys(db.auctions);
-
-    console.log(auctionId, id);
+    const [auctionId] = Object.keys(db.auctions);
 
     if (state.status === "idle") {
-      const { title, status, supervisor, participants, requirements }: Auction = db.auctions[auctionId || id];
+      const { title, status, supervisor, participants, requirements }: Auction = db.auctions[auctionId];
 
       state.id = auctionId;
       state.title = title;

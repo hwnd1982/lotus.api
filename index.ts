@@ -103,10 +103,6 @@ app.get("/*", (req, res) => {
     const { base: userId } = url;
     const { base: auctionId } = parse(url.dir);
 
-    io.engine.once("upgrade", socket => {
-      console.log(userId);
-    });
-
     io.once("connection", socket => {
       if (state.status === "idle") {
         const { title, status, supervisor, participants, requirements }: Auction = db.auctions[auctionId];

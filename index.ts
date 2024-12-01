@@ -83,6 +83,7 @@ app.get("/*", (req, res) => {
     }
 
     res.json(state);
+    io.emit("connection", state);
     return;
   }
 

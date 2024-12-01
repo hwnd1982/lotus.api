@@ -82,7 +82,7 @@ app.get("/*", (req, res) => {
   }
 
   if (/\/auction/.test(req.url)) {
-    io.once("connection", socket => {
+    io.on("connection", socket => {
       const state: Auction<[string, string]> = {
         id: "",
         title: "",

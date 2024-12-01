@@ -66,18 +66,19 @@ app.get("/*", (req, res) => {
 
   if (/\/action\/state/.test(req.url)) {
     const [auctionId] = Object.keys(db.auctions);
-    const { title, status, supervisor, participants, requirements, online }: Auction = db.auctions[auctionId];
+    if (state.status === "idle") {
+      const { title, status, supervisor, participants, requirements, online }: Auction = db.auctions[auctionId];
 
-    res.json({
-      id: auctionId,
-      title,
-      status,
-      supervisor,
-      participants,
-      requirements: requirements.map(requirement => [requirement.name, requirement.title]),
-      online,
-    });
+      state.id = auctionId;
+      state.title = title;
+      state.status = status;
+      state.supervisor = supervisor;
+      state.participants = participants;
+      state.requirements = requirements.map(requirement => [requirement.name, requirement.title]);
+      state.online = online;
+    }
 
+    res.json(state);
     return;
   }
 
@@ -98,14 +99,19 @@ app.get("/*", (req, res) => {
       const url = parse(req.url);
       const { base: userId } = url;
       const { base: auctionId } = parse(url.dir);
-      const { title, status, supervisor, participants, requirements }: Auction = db.auctions[auctionId];
 
-      state.id = auctionId;
-      state.title = title;
-      state.status = status;
-      state.supervisor = supervisor;
-      state.participants = participants;
-      state.requirements = requirements.map(requirement => [requirement.name, requirement.title]);
+      if (state.status === "idle") {
+        const { title, status, supervisor, participants, requirements, online }: Auction = db.auctions[auctionId];
+
+        state.id = auctionId;
+        state.title = title;
+        state.status = status;
+        state.supervisor = supervisor;
+        state.participants = participants;
+        state.requirements = requirements.map(requirement => [requirement.name, requirement.title]);
+        state.online = online;
+      }
+
       if (!state.online.includes(userId)) {
         state.online = [...state.online, userId];
       }

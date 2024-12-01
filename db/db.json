@@ -39,7 +39,8 @@
           "required": true
         }
       ],
-      "participants": []
+      "participants": [],
+      "online": []
     }
   }
 }

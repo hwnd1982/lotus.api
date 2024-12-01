@@ -67,11 +67,13 @@ app.get("/*", (req, res) => {
   }
 
   const db = JSON.parse(readFileSync(join(__dirname, env.DB_URL, "db.json"), "utf8"));
+  const url = parse(req.url);
+  const { base: userId } = url;
+  const { base: auctionId } = parse(url.dir);
 
   if (/\/action\/state/.test(req.url)) {
-    const [auctionId] = Object.keys(db.auctions);
     if (state.status === "idle") {
-      const { title, status, supervisor, participants, requirements, online }: Auction = db.auctions[auctionId];
+      const { title, status, supervisor, participants, requirements }: Auction = db.auctions[auctionId];
 
       state.id = auctionId;
       state.title = title;
@@ -79,7 +81,11 @@ app.get("/*", (req, res) => {
       state.supervisor = supervisor;
       state.participants = participants;
       state.requirements = requirements.map(requirement => [requirement.name, requirement.title]);
-      state.online = online;
+    }
+
+    console.log(userId);
+    if (userId && !state.online.includes(userId)) {
+      state.online = [...state.online, userId];
     }
 
     res.json(state);
@@ -99,17 +105,9 @@ app.get("/*", (req, res) => {
   }
 
   if (/\/auction/.test(req.url)) {
-    const url = parse(req.url);
-    const { base: userId } = url;
-    const { base: auctionId } = parse(url.dir);
-
-    if (!state.online.includes(userId)) {
-      state.online = [...state.online, userId];
-    }
-
     io.once("connection", socket => {
       if (state.status === "idle") {
-        const { title, status, supervisor, participants, requirements, online }: Auction = db.auctions[auctionId];
+        const { title, status, supervisor, participants, requirements }: Auction = db.auctions[auctionId];
 
         state.id = auctionId;
         state.title = title;
@@ -117,7 +115,11 @@ app.get("/*", (req, res) => {
         state.supervisor = supervisor;
         state.participants = participants;
         state.requirements = requirements.map(requirement => [requirement.name, requirement.title]);
-        state.online = online;
+      }
+
+      console.log(userId);
+      if (userId && !state.online.includes(userId)) {
+        state.online = [...state.online, userId];
       }
 
       socket.broadcast.emit("connection", state);

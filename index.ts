@@ -120,6 +120,8 @@ app.get("/*", (req, res) => {
         state.online = [...state.online, userId];
       }
 
+      socket.emit("connect", state);
+      socket.emit("connection", state);
       socket.broadcast.emit("connection", state);
 
       socket.on("left", id => {

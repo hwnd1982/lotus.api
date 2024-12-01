@@ -37,6 +37,7 @@ app.post("/action/*", jsonParser, (req, res) => {
         status: "accepted",
         role: "participant",
       };
+
       const registeredParticipant: Participant | undefined = participants.find(item => item.name === req.body.name);
 
       if (!registeredParticipant) {
@@ -46,6 +47,9 @@ app.post("/action/*", jsonParser, (req, res) => {
         };
 
         writeFileSync(join(__dirname, env.DB_URL, "db.json"), JSON.stringify(db), "utf8");
+
+        state.participants = [...state.participants, newParticipant];
+
         res.status(201);
         res.json({ id: newParticipant.id });
         return;
@@ -83,7 +87,6 @@ app.get("/*", (req, res) => {
   }
 
   if (/\/action\/registration/.test(req.url)) {
-    const db = JSON.parse(readFileSync(join(__dirname, env.DB_URL, "db.json"), "utf8"));
     const url = parse(req.url);
 
     if (db?.auctions[url.name]) {

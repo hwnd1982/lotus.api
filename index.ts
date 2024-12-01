@@ -96,7 +96,9 @@ app.get("/*", (req, res) => {
     io.once("connection", socket => {
       const url = parse(req.url);
 
-      socket.broadcast.emit("connection", url.base);
+      console.log(url);
+      // socket.broadcast.emit("connection", url.base);
+
       socket.on("connection", ({ auctionId, userId }) => {
         const { title, status, supervisor, participants, requirements }: Auction = db.auctions[auctionId];
 
